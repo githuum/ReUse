@@ -1,241 +1,1172 @@
 <!DOCTYPE html>
+
 <html lang="de" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ReUse – Smart Repair & Recycle Analyzer 2026</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    .co2-fill { transition: width 1.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .card-hover:hover { transform: translateY(-6px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
-    .damage-tag { animation: fadeIn 0.3s ease forwards; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    :root {
+      --green-deep: #0a2e1a;
+      --green-mid: #145c33;
+      --green-bright: #22c55e;
+      --green-glow: #4ade80;
+      --emerald: #10b981;
+      --leaf: #86efac;
+      --bg-dark: #060f0a;
+      --bg-card: #0d1f14;
+      --bg-glass: rgba(20, 50, 30, 0.55);
+      --text-main: #e8f5ee;
+      --text-muted: #7dab8f;
+      --gold: #fbbf24;
+      --red-warn: #f87171;
+      --amber: #f59e0b;
+    }
+
+```
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── ANIMATED BG ── */
+.bg-scene {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(20,92,51,0.35) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 50% at 80% 80%, rgba(16,185,129,0.18) 0%, transparent 55%),
+              radial-gradient(ellipse 100% 100% at 50% 50%, #060f0a 60%, #0a2e1a 100%);
+}
+
+.bg-orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(80px);
+  animation: orbFloat 12s ease-in-out infinite;
+}
+.bg-orb-1 { width: 500px; height: 500px; top: -150px; left: -150px; background: radial-gradient(circle, rgba(34,197,94,0.22) 0%, transparent 70%); animation-delay: 0s; }
+.bg-orb-2 { width: 400px; height: 400px; bottom: -100px; right: -100px; background: radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%); animation-delay: -6s; }
+.bg-orb-3 { width: 300px; height: 300px; top: 40%; left: 60%; background: radial-gradient(circle, rgba(74,222,128,0.12) 0%, transparent 70%); animation-delay: -3s; }
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.08); }
+  66% { transform: translate(-20px, 30px) scale(0.95); }
+}
+
+/* ── GRID LINES ── */
+.grid-lines {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(34,197,94,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,197,94,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ── PARTICLES ── */
+.particle {
+  position: fixed; pointer-events: none; z-index: 0;
+  width: 3px; height: 3px; border-radius: 50%;
+  background: var(--green-glow);
+  animation: particleDrift linear infinite;
+  opacity: 0;
+}
+@keyframes particleDrift {
+  0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.4; }
+  100% { transform: translateY(-100px) translateX(var(--drift)); opacity: 0; }
+}
+
+/* ── LAYOUT ── */
+.wrapper { position: relative; z-index: 1; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 80px 24px 60px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3);
+  color: var(--green-glow); font-size: 13px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 8px 20px; border-radius: 100px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(12px);
+  animation: badgePop 0.8s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes badgePop { from { opacity:0; transform:scale(0.8) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(3.5rem, 10vw, 8rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #ffffff 0%, #86efac 40%, #22c55e 70%, #10b981 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: titleReveal 1s cubic-bezier(0.34,1.2,0.64,1) 0.2s both;
+  text-shadow: none;
+}
+@keyframes titleReveal { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
+
+.hero-sub {
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  color: var(--text-muted);
+  max-width: 560px;
+  margin: 24px auto 0;
+  line-height: 1.6;
+  font-weight: 300;
+  animation: titleReveal 1s cubic-bezier(0.34,1.2,0.64,1) 0.4s both;
+}
+
+.hero-note {
+  display: inline-block;
+  margin-top: 20px;
+  background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25);
+  color: var(--gold); font-size: 13px; font-weight: 500;
+  padding: 8px 20px; border-radius: 100px;
+  animation: titleReveal 1s 0.6s both;
+}
+
+.scroll-hint {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--text-muted); font-size: 12px; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  animation: titleReveal 1s 1s both;
+}
+.scroll-hint-line {
+  width: 1px; height: 48px;
+  background: linear-gradient(to bottom, var(--green-bright), transparent);
+  animation: scrollLine 2s ease-in-out infinite;
+}
+@keyframes scrollLine { 0%,100%{opacity:0.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.2)} }
+
+/* ── 3D FLOATING CARD ── */
+.floating-icons {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+}
+.float-icon {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.12;
+  animation: floatIcon linear infinite;
+  filter: drop-shadow(0 0 12px currentColor);
+}
+@keyframes floatIcon {
+  0% { transform: translateY(110%) rotate(0deg); opacity: 0; }
+  5% { opacity: 0.12; }
+  95% { opacity: 0.1; }
+  100% { transform: translateY(-20%) rotate(360deg); opacity: 0; }
+}
+
+/* ── MAIN FORM SECTION ── */
+.section { padding: 80px 24px; max-width: 900px; margin: 0 auto; }
+
+.section-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--green-bright); margin-bottom: 12px; display: block;
+}
+
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800; line-height: 1.1;
+  margin-bottom: 48px;
+}
+
+/* ── 3D CARD ── */
+.card-3d {
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(34,197,94,0.18);
+  border-radius: 28px;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  box-shadow:
+    0 0 0 1px rgba(34,197,94,0.06),
+    0 4px 6px rgba(0,0,0,0.3),
+    0 20px 40px rgba(0,0,0,0.4),
+    0 60px 100px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.card-3d::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(34,197,94,0.08) 0%, transparent 50%, rgba(16,185,129,0.05) 100%);
+  pointer-events: none;
+}
+.card-3d::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(74,222,128,0.5), transparent);
+}
+
+.card-3d:hover {
+  transform: translateY(-4px) rotateX(1deg);
+  box-shadow:
+    0 0 0 1px rgba(34,197,94,0.12),
+    0 8px 16px rgba(0,0,0,0.4),
+    0 32px 60px rgba(0,0,0,0.4),
+    0 80px 120px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* ── FORM ELEMENTS ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+
+.field-group { display: flex; flex-direction: column; gap: 10px; }
+
+.field-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+
+.field-select {
+  width: 100%;
+  background: rgba(6,15,10,0.8);
+  border: 1px solid rgba(34,197,94,0.2);
+  color: var(--text-main);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  transition: border-color 0.25s, box-shadow 0.25s, background-color 0.25s;
+  cursor: pointer;
+}
+.field-select:focus {
+  outline: none;
+  border-color: var(--green-bright);
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.15), 0 0 20px rgba(34,197,94,0.1);
+  background-color: rgba(6,15,10,0.95);
+}
+.field-select:disabled {
+  opacity: 0.35; cursor: not-allowed;
+}
+.field-select option { background: #0a2e1a; color: var(--text-main); }
+
+/* ── DAMAGE GRID ── */
+.damage-section { margin-top: 40px; }
+.damage-title {
+  font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700;
+  color: var(--text-main); margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.damage-title span { color: var(--text-muted); font-size: 13px; font-weight: 400; font-family: 'DM Sans', sans-serif; }
+
+.damage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (min-width: 540px) { .damage-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.damage-chip {
+  position: relative;
+  display: flex; flex-direction: column; gap: 6px;
+  background: rgba(6,15,10,0.7);
+  border: 1px solid rgba(34,197,94,0.15);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  overflow: hidden;
+}
+.damage-chip::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(34,197,94,0.12), transparent 70%);
+  opacity: 0; transition: opacity 0.3s;
+}
+.damage-chip:hover { border-color: rgba(34,197,94,0.4); transform: translateY(-2px); }
+.damage-chip:hover::before { opacity: 1; }
+.damage-chip.selected {
+  border-color: var(--green-bright);
+  background: rgba(34,197,94,0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(34,197,94,0.15), inset 0 1px 0 rgba(74,222,128,0.2);
+}
+.damage-chip.selected::before { opacity: 1; }
+
+.damage-chip input[type="checkbox"] { display: none; }
+
+.damage-chip-icon { font-size: 1.6rem; line-height: 1; }
+.damage-chip-name { font-size: 12.5px; font-weight: 500; color: var(--text-main); line-height: 1.3; }
+.damage-check {
+  position: absolute; top: 10px; right: 10px;
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 1.5px solid rgba(34,197,94,0.3);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s;
+  background: transparent;
+}
+.damage-chip.selected .damage-check {
+  background: var(--green-bright); border-color: var(--green-bright);
+}
+.damage-chip.selected .damage-check::after {
+  content: '✓'; font-size: 11px; color: white; font-weight: 700;
+}
+
+/* ── ANALYZE BUTTON ── */
+.analyze-btn {
+  margin-top: 36px; width: 100%;
+  background: linear-gradient(135deg, #16a34a, #059669);
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-size: 1.05rem; font-weight: 700; letter-spacing: 0.05em;
+  padding: 20px 32px;
+  border: none; border-radius: 18px;
+  cursor: pointer;
+  position: relative; overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 4px 16px rgba(22,163,74,0.3), 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+.analyze-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+}
+.analyze-btn::after {
+  content: '';
+  position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s;
+}
+.analyze-btn:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 8px 32px rgba(22,163,74,0.45), 0 2px 8px rgba(0,0,0,0.3); }
+.analyze-btn:hover::after { left: 140%; }
+.analyze-btn:active { transform: translateY(-1px) scale(0.99); }
+
+/* ── RESULT SECTION ── */
+.result-section { display: none; margin-top: 60px; }
+.result-section.visible { display: block; animation: resultReveal 0.7s cubic-bezier(0.34,1.2,0.64,1) both; }
+@keyframes resultReveal { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+
+.result-header-card {
+  background: linear-gradient(135deg, rgba(22,101,52,0.6), rgba(6,78,59,0.6));
+  border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 24px; padding: 36px;
+  display: flex; flex-wrap: wrap; gap: 28px; align-items: center;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+}
+.result-header-card::before {
+  content: '';
+  position: absolute; top: -50%; right: -20%;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,197,94,0.15), transparent 70%);
+  pointer-events: none;
+}
+
+.result-device { flex: 1; min-width: 180px; }
+.result-device-label { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--leaf); opacity: 0.7; margin-bottom: 6px; }
+.result-device-name { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; }
+
+.result-cost { text-align: center; }
+.result-cost-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 3.5rem; font-weight: 800; line-height: 1;
+  background: linear-gradient(135deg, #fff, var(--leaf));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.result-cost-label { font-size: 12px; color: var(--leaf); opacity: 0.7; margin-top: 4px; }
+
+.result-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; flex: 1; min-width: 160px; }
+.result-tag {
+  background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.25);
+  color: var(--leaf); font-size: 12px; padding: 6px 14px; border-radius: 100px;
+}
+
+/* ── DAMAGE RESULT CARDS ── */
+.damage-result-card {
+  background: rgba(13,31,20,0.8); border: 1px solid rgba(34,197,94,0.12);
+  border-radius: 20px; padding: 28px;
+  backdrop-filter: blur(16px);
+  position: relative; overflow: hidden;
+  transition: transform 0.3s ease, border-color 0.3s;
+}
+.damage-result-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--green-bright), var(--emerald));
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.damage-result-card:hover { transform: translateY(-3px); border-color: rgba(34,197,94,0.25); }
+.damage-result-card:hover::after { transform: scaleX(1); }
+
+.drc-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.drc-name { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 700; }
+.drc-cost { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--green-glow); }
+.drc-meta { display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+.drc-pill {
+  font-size: 11px; padding: 4px 12px; border-radius: 100px; font-weight: 600;
+}
+.drc-pill.success { background: rgba(34,197,94,0.15); color: var(--green-glow); border: 1px solid rgba(34,197,94,0.2); }
+.drc-pill.diff { background: rgba(16,185,129,0.1); color: var(--emerald); border: 1px solid rgba(16,185,129,0.2); }
+.drc-advice { margin-top: 16px; color: var(--text-muted); font-size: 14px; line-height: 1.65; }
+.drc-co2 { margin-top: 12px; font-size: 12.5px; color: rgba(134,239,172,0.6); }
+.drc-co2 strong { color: var(--leaf); }
+
+/* ── OVERALL RECOMMENDATION ── */
+.overall-card {
+  border-radius: 24px; padding: 36px;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(20px);
+  border: 1px solid;
+}
+.overall-card.green { background: rgba(20,92,51,0.3); border-color: rgba(34,197,94,0.3); }
+.overall-card.amber { background: rgba(120,53,15,0.3); border-color: rgba(245,158,11,0.3); }
+.overall-card.red { background: rgba(127,29,29,0.3); border-color: rgba(248,113,113,0.3); }
+
+.overall-status {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.6rem; font-weight: 800; margin-bottom: 14px;
+}
+.overall-text { color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+.overall-tip { margin-top: 16px; font-size: 13px; color: rgba(134,239,172,0.6); font-style: italic; }
+
+/* ── CHOICE TABS ── */
+.choice-tabs {
+  display: flex; gap: 12px; justify-content: center; margin-bottom: 24px;
+}
+.choice-tab {
+  flex: 1; max-width: 220px;
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: 1px solid rgba(34,197,94,0.2);
+  background: rgba(13,31,20,0.6);
+  color: var(--text-muted);
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  backdrop-filter: blur(12px);
+}
+.choice-tab:hover { border-color: rgba(34,197,94,0.4); color: var(--text-main); transform: translateY(-2px); }
+.choice-tab.active {
+  background: linear-gradient(135deg, rgba(22,163,74,0.25), rgba(5,150,105,0.2));
+  border-color: var(--green-bright);
+  color: var(--green-glow);
+  box-shadow: 0 0 20px rgba(34,197,94,0.15);
+}
+.choice-tab.active-recycle {
+  background: linear-gradient(135deg, rgba(6,182,212,0.2), rgba(14,165,233,0.15));
+  border-color: #06b6d4;
+  color: #67e8f9;
+  box-shadow: 0 0 20px rgba(6,182,212,0.15);
+}
+
+/* ── CHOICE PANELS ── */
+.choice-panel { animation: panelIn 0.4s cubic-bezier(0.34,1.2,0.64,1) both; }
+.choice-panel.hidden { display: none; }
+@keyframes panelIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+.choice-panel-inner {
+  border-radius: 24px; padding: 36px;
+  backdrop-filter: blur(20px);
+  position: relative; overflow: hidden;
+  border: 1px solid;
+}
+.repair-inner {
+  background: linear-gradient(135deg, rgba(14,47,29,0.7), rgba(5,46,22,0.5));
+  border-color: rgba(34,197,94,0.25);
+}
+.repair-inner::before {
+  content: ''; position: absolute; top: -80px; right: -80px;
+  width: 240px; height: 240px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,197,94,0.12), transparent 70%);
+  pointer-events: none;
+}
+.recycle-inner {
+  background: linear-gradient(135deg, rgba(8,50,60,0.7), rgba(5,30,50,0.5));
+  border-color: rgba(6,182,212,0.25);
+}
+.recycle-inner::before {
+  content: ''; position: absolute; top: -80px; right: -80px;
+  width: 240px; height: 240px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(6,182,212,0.1), transparent 70%);
+  pointer-events: none;
+}
+
+.choice-header { display: flex; align-items: center; gap: 18px; margin-bottom: 28px; }
+.choice-icon {
+  width: 60px; height: 60px; border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; flex-shrink: 0;
+}
+.repair-icon { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.25); }
+.recycle-icon { background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.25); }
+.choice-title { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; }
+.choice-subtitle { font-size:13px; color:var(--text-muted); margin-top:4px; }
+
+/* ── CHOICE STATS ── */
+.choice-stats {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
+  margin-bottom: 28px;
+}
+@media (max-width: 480px) { .choice-stats { grid-template-columns: 1fr 1fr; } }
+.cstat {
+  background: rgba(6,15,10,0.5); border-radius: 14px; padding: 16px;
+  border: 1px solid rgba(34,197,94,0.1); text-align: center;
+}
+.recycle-inner .cstat { border-color: rgba(6,182,212,0.1); }
+.cstat-num { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800; }
+.cstat-num.green { color: var(--green-glow); }
+.cstat-label { font-size:11px; color:var(--text-muted); margin-top:4px; line-height:1.3; }
+
+/* ── CO2 COMPARE BLOCK ── */
+.co2-compare-block { margin-bottom: 24px; }
+.co2-compare-label { font-size:13px; font-weight:600; color:var(--text-muted); letter-spacing:0.04em; margin-bottom:2px; }
+
+/* ── PROS / CONS ── */
+.choice-pros { display: flex; flex-direction: column; gap: 8px; }
+.pro-item, .con-item {
+  font-size: 13.5px; padding: 10px 14px; border-radius: 10px;
+}
+.pro-item { background: rgba(34,197,94,0.07); color: var(--leaf); }
+.con-item { background: rgba(245,158,11,0.07); color: #fcd34d; }
+
+/* ── RECYCLE MATERIALS GRID ── */
+.recycle-materials-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px;
+}
+.mat-chip {
+  background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.2);
+  color: #67e8f9; font-size: 12px; font-weight: 600;
+  padding: 6px 14px; border-radius: 100px;
+}
+
+/* ── CO2 BAR (keep for panels) ── */
+.co2-track {
+  background: rgba(6,15,10,0.8); height: 32px; border-radius: 100px;
+  overflow: hidden; position: relative;
+  border: 1px solid rgba(34,197,94,0.12);
+}
+.co2-fill {
+  height: 100%; width: 0%;
+  border-radius: 100px;
+  transition: width 1.8s cubic-bezier(0.34,1.2,0.64,1);
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 14px;
+  font-weight: 700; font-size: 13px; color: white;
+  position: relative;
+}
+.co2-fill::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+@keyframes shimmer { 0%,100%{transform:translateX(-100%)} 50%{transform:translateX(200%)} }
+.co2-text { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+.co2-text strong { color: var(--green-glow); }
+
+/* ── ACTION BUTTONS ── */
+.action-buttons { display: flex; flex-wrap: wrap; gap: 14px; }
+.action-btn {
+  flex: 1; min-width: 200px;
+  padding: 18px 28px;
+  border: none; border-radius: 16px;
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative; overflow: hidden;
+}
+.action-btn::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.5s;
+}
+.action-btn:hover::before { left: 140%; }
+.action-btn:hover { transform: translateY(-3px); }
+
+.btn-repair { background: linear-gradient(135deg, #16a34a, #059669); color: white; box-shadow: 0 4px 20px rgba(22,163,74,0.3); }
+.btn-repair:hover { box-shadow: 0 8px 32px rgba(22,163,74,0.45); }
+.btn-recycle { background: rgba(255,255,255,0.06); color: var(--text-main); border: 1px solid rgba(255,255,255,0.1); }
+.btn-recycle:hover { background: rgba(255,255,255,0.1); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.btn-share { width: 100%; background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.25); font-size: 15px; }
+.btn-share:hover { background: rgba(99,102,241,0.25); border-color: rgba(99,102,241,0.45); }
+
+/* ── INFO SECTION ── */
+.info-section { padding: 100px 24px; }
+.info-inner { max-width: 900px; margin: 0 auto; }
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 60px; }
+@media (max-width: 640px) { .info-grid { grid-template-columns: 1fr; } }
+
+.info-card {
+  background: var(--bg-glass); border: 1px solid rgba(34,197,94,0.14);
+  border-radius: 24px; padding: 36px;
+  backdrop-filter: blur(20px);
+  position: relative; overflow: hidden;
+  transition: transform 0.3s ease, border-color 0.3s;
+}
+.info-card:hover { transform: translateY(-6px); border-color: rgba(34,197,94,0.3); }
+.info-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(74,222,128,0.4), transparent);
+}
+
+.info-card-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; margin-bottom: 20px;
+}
+.info-card-title {
+  font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800;
+  margin-bottom: 14px; color: var(--text-main);
+}
+.info-card-text { font-size: 14px; color: var(--text-muted); line-height: 1.75; }
+.info-card-stat {
+  margin-top: 20px; padding-top: 20px;
+  border-top: 1px solid rgba(34,197,94,0.1);
+  font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800;
+  color: var(--green-glow);
+}
+.info-card-stat-label { font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.info-wide {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(14,47,29,0.7), rgba(6,78,59,0.4));
+  border-color: rgba(16,185,129,0.2);
+}
+.info-wide-inner { display: flex; flex-wrap: wrap; gap: 32px; }
+.info-wide-text { flex: 1; min-width: 260px; }
+.info-eu-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.2);
+  color: var(--gold); padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 600;
+  margin-bottom: 16px;
+}
+.info-wide-stats { display: flex; flex-direction: column; gap: 16px; justify-content: center; }
+.mini-stat { text-align: right; }
+.mini-stat-num { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--gold); }
+.mini-stat-label { font-size: 12px; color: var(--text-muted); }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid rgba(34,197,94,0.1);
+  padding: 48px 24px;
+  text-align: center;
+  background: rgba(6,15,10,0.8);
+}
+.footer-logo {
+  font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800;
+  background: linear-gradient(135deg, var(--leaf), var(--green-bright));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 12px;
+}
+.footer-text { color: var(--text-muted); font-size: 13.5px; line-height: 1.7; }
+.footer-version { margin-top: 20px; font-size: 11px; color: rgba(125,171,143,0.4); letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* ── DIVIDER ── */
+.divider {
+  width: 60px; height: 3px; border-radius: 100px;
+  background: linear-gradient(90deg, var(--green-bright), var(--emerald));
+  margin-bottom: 24px;
+}
+
+/* ── UTILITY ── */
+.space-y > * + * { margin-top: 16px; }
+.space-y-lg > * + * { margin-top: 24px; }
+
+@media (max-width: 640px) {
+  .card-3d { padding: 28px 20px; }
+  .result-header-card { padding: 24px; }
+}
+
+/* ── SCROLL REVEAL ── */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.in-view { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+/* ── GLOW PULSE ── */
+.glow-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green-bright);
+  display: inline-block;
+  animation: glowPulse 2s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%,100%{ box-shadow:0 0 0 0 rgba(34,197,94,0.5); }
+  50%{ box-shadow:0 0 0 8px rgba(34,197,94,0); }
+}
+```
+
   </style>
 </head>
-<body class="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen text-gray-800">
+<body>
 
-  <!-- Hero -->
-  <header class="bg-gradient-to-br from-green-700 via-green-600 to-emerald-500 text-white py-16 px-6 text-center">
-    <div class="max-w-4xl mx-auto">
-      <h1 class="text-5xl md:text-6xl font-extrabold mb-4 flex items-center justify-center gap-3">
-        ♻️ ReUse Analyzer
-      </h1>
-      <p class="text-xl md:text-2xl opacity-95 max-w-3xl mx-auto">
-        Reparieren statt wegwerfen – spare Geld, Ressourcen und bis zu 110 kg CO₂ pro Gerät.
-      </p>
-      <p class="mt-4 text-lg opacity-90">EU-Recht 2026/27: mehr Reparaturrechte & günstigere Ersatzteile kommen!</p>
-    </div>
-  </header>
+  <!-- Background Scene -->
 
-  <!-- Main Form -->
-  <main class="max-w-3xl mx-auto px-5 py-12">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
+  <div class="bg-scene"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <div class="grid-lines"></div>
+  <div id="particles"></div>
 
-      <div class="grid md:grid-cols-2 gap-6">
+  <div class="wrapper">
+
+```
+<!-- ── HERO ── -->
+<header class="hero">
+  <div class="floating-icons" id="floatingIcons"></div>
+
+  <div class="hero-badge">
+    <span class="glow-dot"></span>
+    Smart Repair & Recycle Analyzer 2026
+  </div>
+
+  <h1 class="hero-title">ReUse</h1>
+
+  <p class="hero-sub">
+    Reparieren statt wegwerfen. Analysiere dein Gerät, spare Geld und bis zu <strong style="color:var(--green-glow)">110 kg CO₂</strong> pro Gerät.
+  </p>
+
+  <div class="hero-note">
+    ⚡ EU-Gesetz 2026/27: Mehr Reparaturrechte & günstigere Ersatzteile kommen
+  </div>
+
+  <div class="scroll-hint">
+    <span>Jetzt analysieren</span>
+    <div class="scroll-hint-line"></div>
+  </div>
+</header>
+
+<!-- ── ANALYZER SECTION ── -->
+<main>
+  <div class="section">
+    <span class="section-label reveal">Gerät analysieren</span>
+    <h2 class="section-title reveal reveal-delay-1">Reparieren oder<br><span style="color:var(--green-bright)">Recyceln – du entscheidest</span></h2>
+
+    <div class="card-3d reveal reveal-delay-2">
+
+      <div class="form-grid">
         <!-- Gerätetyp -->
-        <div>
-          <label class="block text-lg font-semibold mb-2">Gerätetyp</label>
-          <select id="device" class="w-full p-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg">
-            <option value="">Bitte wählen...</option>
+        <div class="field-group">
+          <label class="field-label" for="device">Gerätetyp</label>
+          <select id="device" class="field-select">
+            <option value="">Bitte wählen…</option>
             <option value="smartphone">Smartphone</option>
             <option value="tablet">Tablet</option>
           </select>
         </div>
 
         <!-- Marke -->
-        <div>
-          <label class="block text-lg font-semibold mb-2">Marke</label>
-          <select id="brand" disabled class="w-full p-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg">
+        <div class="field-group">
+          <label class="field-label" for="brand">Marke</label>
+          <select id="brand" class="field-select" disabled>
             <option value="">Zuerst Gerät wählen</option>
           </select>
         </div>
 
         <!-- Modell -->
-        <div>
-          <label class="block text-lg font-semibold mb-2">Modell</label>
-          <select id="model" disabled class="w-full p-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg">
+        <div class="field-group">
+          <label class="field-label" for="model">Modell</label>
+          <select id="model" class="field-select" disabled>
             <option value="">Marke auswählen</option>
           </select>
         </div>
 
         <!-- Alter -->
-        <div>
-          <label class="block text-lg font-semibold mb-2">Alter des Geräts</label>
-          <select id="age" disabled class="w-full p-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg">
+        <div class="field-group">
+          <label class="field-label" for="age">Alter des Geräts</label>
+          <select id="age" class="field-select" disabled>
             <option value="">Modell wählen</option>
           </select>
         </div>
       </div>
 
-      <!-- Mehrfach-Schadensauswahl -->
-      <div class="mt-10">
-        <label class="block text-xl font-bold mb-4 text-green-800">
-          <i class="fas fa-tools mr-2"></i> Welche Defekte / Probleme hast du? 
-          <span class="text-base font-normal text-gray-500">(Mehrfachauswahl möglich – für maximale Genauigkeit)</span>
-        </label>
-        
-        <div id="damageOptions" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <!-- Wird per JS dynamisch gefüllt -->
+      <!-- Defekte -->
+      <div class="damage-section">
+        <div class="damage-title">
+          <i class="fas fa-tools" style="color:var(--green-bright)"></i>
+          Welche Defekte hast du?
+          <span>(Mehrfachauswahl möglich)</span>
         </div>
+        <div class="damage-grid" id="damageOptions"></div>
       </div>
 
-      <button onclick="analyzeDevice()" class="mt-10 w-full bg-green-600 hover:bg-green-700 text-white text-xl font-bold py-5 px-8 rounded-2xl transition shadow-lg flex items-center justify-center gap-3 text-lg">
-        <i class="fas fa-calculator"></i> 
+      <button class="analyze-btn" onclick="analyzeDevice()">
+        <i class="fas fa-calculator"></i>
         Jetzt detailliert analysieren
       </button>
-
-      <!-- Ergebnis-Bereich -->
-      <div id="result" class="mt-12 hidden">
-        <h2 class="text-3xl font-bold text-center mb-8 text-green-700">Dein detailliertes ReUse-Ergebnis</h2>
-        
-        <div id="resultHeader" class="mb-8"></div>
-
-        <!-- Individuelle Schadens-Analyse -->
-        <div class="mb-10">
-          <h3 class="text-2xl font-semibold mb-6 flex items-center gap-2">
-            <i class="fas fa-list-check"></i> 
-            Individuelle Bewertung jedes Defekts
-          </h3>
-          <div id="damageResults" class="space-y-6"></div>
-        </div>
-
-        <!-- Gesamt-Empfehlung -->
-        <div id="overallRecommendation" class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-3xl p-8 mb-10"></div>
-
-        <!-- CO₂-Visualisierung -->
-        <div class="mt-8 bg-white rounded-3xl shadow-inner p-8">
-          <h3 class="text-2xl font-semibold mb-4 text-center">CO₂-Einsparung durch Reparatur</h3>
-          <div class="bg-gray-100 h-8 rounded-3xl overflow-hidden relative">
-            <div id="co2bar" class="co2-fill h-full bg-gradient-to-r from-emerald-400 via-green-500 to-teal-600 flex items-center justify-end pr-4 text-white font-bold text-lg"></div>
-          </div>
-          <p id="co2text" class="text-center mt-5 text-xl font-medium"></p>
-        </div>
-
-        <!-- Aktions-Buttons -->
-        <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-          <button onclick="findRepair()" class="bg-green-600 hover:bg-green-700 text-white px-8 py-5 rounded-2xl font-semibold flex-1 flex items-center justify-center gap-3 text-lg shadow-md">
-            <i class="fas fa-tools"></i> Reparatur-Shops in deiner Nähe finden
-          </button>
-          <button onclick="findRecycle()" class="bg-gray-700 hover:bg-gray-800 text-white px-8 py-5 rounded-2xl font-semibold flex-1 flex items-center justify-center gap-3 text-lg shadow-md">
-            <i class="fas fa-recycle"></i> Recycling- & Entsorgungsstellen finden
-          </button>
-        </div>
-
-        <button onclick="shareResult()" class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-2xl font-semibold flex items-center justify-center gap-3 text-lg">
-          <i class="fas fa-share-alt"></i> Dieses detaillierte Ergebnis teilen
-        </button>
-      </div>
     </div>
 
-    <!-- Info-Block -->
-    <section class="mt-16 bg-white rounded-2xl shadow-lg p-8 md:p-10">
-      <h2 class="text-3xl font-bold text-green-700 mb-6">Warum Reparieren so wichtig ist</h2>
-      <div class="prose lg:prose-lg max-w-none">
-        <p>Die Produktion eines Smartphones verursacht heute ca. <strong>45–110 kg CO₂</strong> – je nach Modell und Hersteller (2025/26 Werte: Samsung oft günstiger, Google Pixel teurer).</p>
-        <p>Reparieren spart nicht nur Geld, sondern vermeidet vor allem die energieintensive Neuproduktion – besonders Rohstoffabbau (bis 80–160 kg Rohstoffe pro Gerät) und die damit verbundenen Emissionen.</p>
-        <p>Ab Mitte 2026 / 2027 (EU-Recht auf Reparatur) müssen Hersteller Ersatzteile länger bereitstellen und Reparaturen günstiger ermöglichen – das wird Reparieren noch attraktiver machen.</p>
-      </div>
-    </section>
-  </main>
+    <!-- ── RESULT ── -->
+    <div class="result-section" id="result">
 
-  <footer class="bg-green-900 text-white text-center py-10 mt-16">
-    <p class="text-lg">ReUse – Weil unser Planet keine neuen Smartphones braucht, sondern funktionierende. 🌍❤️</p>
-    <p class="mt-2 opacity-80">Version 2026 • Extrem detaillierte Mehrfach-Analyse</p>
-  </footer>
+      <h2 style="font-family:'Syne',sans-serif;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:800;text-align:center;margin-bottom:36px;">
+        Dein <span style="color:var(--green-bright)">ReUse-Ergebnis</span>
+      </h2>
+
+      <!-- Header Card -->
+      <div id="resultHeader" class="result-header-card" style="margin-bottom:36px;"></div>
+
+      <!-- Damage Results -->
+      <div style="margin-bottom:28px;">
+        <h3 style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+          <i class="fas fa-list-check" style="color:var(--green-bright)"></i>
+          Individuelle Bewertung jedes Defekts
+        </h3>
+        <div id="damageResults" class="space-y-lg"></div>
+      </div>
+
+      <!-- ── CHOICE SECTION ── -->
+      <div style="margin-bottom:28px;">
+        <h3 style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;text-align:center;margin-bottom:8px;">
+          Was passt besser zu dir?
+        </h3>
+        <p style="text-align:center;color:var(--text-muted);font-size:14px;margin-bottom:28px;">
+          Beide Wege sind umweltfreundlicher als ein Neukauf. Wähle selbst, was dir wichtiger ist.
+        </p>
+
+        <!-- Tab switcher -->
+        <div class="choice-tabs">
+          <button class="choice-tab active" id="tab-repair" onclick="showTab('repair')">
+            🔧 Reparieren
+          </button>
+          <button class="choice-tab" id="tab-recycle" onclick="showTab('recycle')">
+            ♻️ Recyceln
+          </button>
+        </div>
+
+        <!-- REPAIR PANEL -->
+        <div class="choice-panel" id="panel-repair">
+          <div class="choice-panel-inner repair-inner">
+            <div class="choice-header">
+              <div class="choice-icon repair-icon">🔧</div>
+              <div>
+                <div class="choice-title">Reparatur</div>
+                <div class="choice-subtitle">Dein Gerät weiter nutzen – mit neuer Energie</div>
+              </div>
+            </div>
+
+            <div class="choice-stats">
+              <div class="cstat">
+                <div class="cstat-num" id="repair-cost-display">—</div>
+                <div class="cstat-label">Geschätzte Kosten</div>
+              </div>
+              <div class="cstat">
+                <div class="cstat-num green" id="repair-co2-display">—</div>
+                <div class="cstat-label">CO₂ eingespart</div>
+              </div>
+              <div class="cstat">
+                <div class="cstat-num" id="repair-life-display">—</div>
+                <div class="cstat-label">Ø Lebensverlängerung</div>
+              </div>
+            </div>
+
+            <div class="co2-compare-block">
+              <div class="co2-compare-label">CO₂-Einsparung gegenüber Neukauf</div>
+              <div class="co2-track" style="margin-top:10px;">
+                <div id="co2bar-repair" class="co2-fill" style="background:linear-gradient(90deg,#16a34a,#10b981,#34d399);"></div>
+              </div>
+              <p id="co2text-repair" class="co2-text" style="margin-top:14px;"></p>
+            </div>
+
+            <div class="choice-pros">
+              <div class="pro-item">✅ Gerät weiter nutzen – keine Eingewöhnung</div>
+              <div class="pro-item">✅ Oft günstiger als Neukauf</div>
+              <div class="pro-item">✅ Höchste CO₂-Einsparung möglich</div>
+              <div class="pro-item">✅ EU-Recht 2026/27 macht Ersatzteile günstiger</div>
+              <div class="con-item">⚠️ Nicht immer erfolgreich (je nach Defekt)</div>
+              <div class="con-item">⚠️ Bei alten Geräten evtl. nicht wirtschaftlich</div>
+            </div>
+
+            <button class="action-btn btn-repair" onclick="findRepair()" style="margin-top:24px;width:100%;">
+              <i class="fas fa-tools"></i> Reparatur-Shops in deiner Nähe finden
+            </button>
+          </div>
+        </div>
+
+        <!-- RECYCLE PANEL -->
+        <div class="choice-panel hidden" id="panel-recycle">
+          <div class="choice-panel-inner recycle-inner">
+            <div class="choice-header">
+              <div class="choice-icon recycle-icon">♻️</div>
+              <div>
+                <div class="choice-title">Recycling</div>
+                <div class="choice-subtitle">Rohstoffe zurückgewinnen – den Kreislauf schließen</div>
+              </div>
+            </div>
+
+            <div class="choice-stats">
+              <div class="cstat">
+                <div class="cstat-num green">Kostenlos</div>
+                <div class="cstat-label">Rückgabe an Wertstoffhöfen</div>
+              </div>
+              <div class="cstat">
+                <div class="cstat-num" id="recycle-materials-display">—</div>
+                <div class="cstat-label">Rohstoffe rückgewinnbar</div>
+              </div>
+              <div class="cstat">
+                <div class="cstat-num green">bis 95 %</div>
+                <div class="cstat-label">Wertstoffe wiederverwendbar</div>
+              </div>
+            </div>
+
+            <div class="co2-compare-block">
+              <div class="co2-compare-label">CO₂-Einsparung gegenüber nicht recyceln</div>
+              <div class="co2-track" style="margin-top:10px;">
+                <div id="co2bar-recycle" class="co2-fill" style="background:linear-gradient(90deg,#0d9488,#06b6d4,#38bdf8);"></div>
+              </div>
+              <p id="co2text-recycle" class="co2-text" style="margin-top:14px;"></p>
+            </div>
+
+            <div class="recycle-materials-grid" id="recycle-materials-grid"></div>
+
+            <div class="choice-pros" style="margin-top:20px;">
+              <div class="pro-item">✅ Kostenlos an Wertstoffhöfen & Rücknahmestellen</div>
+              <div class="pro-item">✅ Gold, Silber, Kobalt, Lithium werden zurückgewonnen</div>
+              <div class="pro-item">✅ Verhindert giftige Deponien in Entwicklungsländern</div>
+              <div class="pro-item">✅ Senkt den Bedarf an neuem Bergbau</div>
+              <div class="con-item">⚠️ Gerät ist danach nicht mehr nutzbar</div>
+              <div class="con-item">⚠️ Nur bei zertifizierten Stellen wirklich sinnvoll</div>
+            </div>
+
+            <button class="action-btn btn-recycle" onclick="findRecycle()" style="margin-top:24px;width:100%;border:1px solid rgba(6,182,212,0.3);background:rgba(6,182,212,0.1);color:#67e8f9;">
+              <i class="fas fa-recycle"></i> Zertifizierte Recycling-Stellen finden
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Share -->
+      <button class="action-btn btn-share" onclick="shareResult()">
+        <i class="fas fa-share-alt"></i> Dieses Ergebnis teilen
+      </button>
+    </div>
+  </div>
+
+  <!-- ── INFO SECTION ── -->
+  <section class="info-section">
+    <div class="info-inner">
+      <span class="section-label reveal">Hintergrundwissen</span>
+      <div class="divider reveal"></div>
+      <h2 class="section-title reveal reveal-delay-1">
+        Warum Reparieren &<br>
+        <span style="color:var(--green-bright)">Recycling so wichtig sind</span>
+      </h2>
+
+      <div class="info-grid">
+
+        <!-- Card 1: CO2 Produktion -->
+        <div class="info-card reveal reveal-delay-1">
+          <div class="info-card-icon">🌍</div>
+          <div class="info-card-title">Produktions-CO₂ ist riesig</div>
+          <div class="info-card-text">
+            Die Herstellung eines einzigen Smartphones verursacht zwischen <strong style="color:var(--green-glow)">45 und 110 kg CO₂</strong> – noch bevor du es das erste Mal aufladest. Grund dafür sind energieintensive Prozesse beim Rohstoffabbau (Lithium, Kobalt, Seltene Erden) und die komplexe globale Lieferkette über Dutzende Länder.
+          </div>
+          <div class="info-card-stat">80–160 kg</div>
+          <div class="info-card-stat-label">Rohstoffe pro Gerät (Erz, Wasser, Chemikalien)</div>
+        </div>
+
+        <!-- Card 2: Reparieren -->
+        <div class="info-card reveal reveal-delay-2">
+          <div class="info-card-icon">🔧</div>
+          <div class="info-card-title">Reparieren schlägt Neukauf</div>
+          <div class="info-card-text">
+            Ein Akku-Tausch statt Neukauf spart bis zu <strong style="color:var(--green-glow)">95 % der Produktionsemissionen</strong>. Reparaturen vermeiden vor allem die energieintensive Neuproduktion. Je länger ein Gerät genutzt wird, desto besser sein ökologischer Fußabdruck – selbst wenn Strom für das Laden hinzukommt, ist die Bilanz deutlich positiver.
+          </div>
+          <div class="info-card-stat">+ 2–4 Jahre</div>
+          <div class="info-card-stat-label">Lebensverlängerung durch einen einfachen Akku-Tausch</div>
+        </div>
+
+        <!-- Card 3: Elektroschrott -->
+        <div class="info-card reveal reveal-delay-1">
+          <div class="info-card-icon">⚡</div>
+          <div class="info-card-title">Elektroschrott – die versteckte Krise</div>
+          <div class="info-card-text">
+            Weltweit entstehen jährlich über <strong style="color:var(--green-glow)">62 Millionen Tonnen</strong> Elektroschrott – Tendenz stark steigend. Nur rund 22 % werden offiziell recycelt. Der Rest landet auf Deponien in Entwicklungsländern, wo giftige Schwermetalle (Blei, Quecksilber, Cadmium) Böden und Grundwasser verseuchen und Menschen direkt gefährden.
+          </div>
+          <div class="info-card-stat">62 Mio. t</div>
+          <div class="info-card-stat-label">E-Schrott weltweit pro Jahr (2025)</div>
+        </div>
+
+        <!-- Card 4: Recycling -->
+        <div class="info-card reveal reveal-delay-2">
+          <div class="info-card-icon">♻️</div>
+          <div class="info-card-title">Recycling schließt den Kreislauf</div>
+          <div class="info-card-text">
+            In einem Smartphone stecken über <strong style="color:var(--green-glow)">60 verschiedene Elemente</strong>, darunter Gold, Silber, Platin und seltene Erden. Korrekt recycelt können bis zu 95 % dieser Wertstoffe zurückgewonnen werden. Das reduziert den Bedarf an neuem Bergbau – einer der zerstörerischsten Industrien für Ökosysteme und Klima.
+          </div>
+          <div class="info-card-stat">95 %</div>
+          <div class="info-card-stat-label">Wertstoffe rückgewinnbar durch korrektes Recycling</div>
+        </div>
+
+        <!-- Wide Card: EU-Recht -->
+        <div class="info-card info-wide reveal">
+          <div class="info-wide-inner">
+            <div class="info-wide-text">
+              <div class="info-eu-badge">⚖️ EU-Recht auf Reparatur 2026/27</div>
+              <div class="info-card-title" style="font-size:1.3rem;">Das neue EU-Gesetz verändert alles</div>
+              <div class="info-card-text">
+                Ab 2026/27 verpflichtet das EU-Recht auf Reparatur Hersteller dazu, Ersatzteile mindestens 7–10 Jahre lang verfügbar zu halten, Software-Updates länger bereitzustellen und Reparaturen nicht durch Software-Sperren zu verhindern. Für Verbraucher bedeutet das: günstigere Ersatzteile, mehr Reparaturdienstleister und eine bewusstere Kaufentscheidung. Reparieren wird endlich wieder zur echten Alternative.
+              </div>
+            </div>
+            <div class="info-wide-stats">
+              <div class="mini-stat">
+                <div class="mini-stat-num">7–10 J.</div>
+                <div class="mini-stat-label">Ersatzteil-Pflicht für Hersteller</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-num">~167 €</div>
+                <div class="mini-stat-label">Ø Ersparnis pro Reparatur vs. Neukauf</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-num">4,8 Mrd.</div>
+                <div class="mini-stat-label">Geräte könnten länger in der EU laufen</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-logo">♻️ ReUse</div>
+  <div class="footer-text">
+    Weil unser Planet keine neuen Smartphones braucht – sondern funktionierende.<br>
+    Jede Reparatur ist ein kleiner Akt gegen Wegwerfkultur. 🌍❤️
+  </div>
+  <div class="footer-version">Version 2026 · Extrem detaillierte Mehrfach-Analyse</div>
+</footer>
+```
+
+  </div><!-- /wrapper -->
 
   <script>
-    // ====================== ERWEITERTE DATENBANK (2026-Realismus) ======================
+    // ───────── PARTICLES ─────────
+    (function createParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.cssText = `
+          left: ${Math.random() * 100}%;
+          animation-duration: ${8 + Math.random() * 14}s;
+          animation-delay: ${Math.random() * -20}s;
+          --drift: ${(Math.random() - 0.5) * 120}px;
+          width: ${2 + Math.random() * 3}px;
+          height: ${2 + Math.random() * 3}px;
+          opacity: ${0.3 + Math.random() * 0.4};
+        `;
+        container.appendChild(p);
+      }
+    })();
+
+    // ───────── FLOATING ICONS ─────────
+    (function createFloatingIcons() {
+      const icons = ['♻️','🔋','🌱','🔧','📱','🌍','⚡','🌿','💚','🔌'];
+      const container = document.getElementById('floatingIcons');
+      icons.forEach((icon, i) => {
+        const el = document.createElement('span');
+        el.className = 'float-icon';
+        el.textContent = icon;
+        el.style.cssText = `
+          left: ${5 + (i / icons.length) * 90}%;
+          animation-duration: ${18 + Math.random() * 20}s;
+          animation-delay: ${-Math.random() * 20}s;
+          font-size: ${1.2 + Math.random() * 1.8}rem;
+        `;
+        container.appendChild(el);
+      });
+    })();
+
+    // ───────── SCROLL REVEAL ─────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in-view'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // ───────── DATA ─────────
     const models = {
       smartphone: {
-        apple: ["iPhone 11","iPhone 12","iPhone 13","iPhone 14","iPhone 15","iPhone 15 Pro","iPhone 16","iPhone 16 Pro"],
+        apple:   ["iPhone 11","iPhone 12","iPhone 13","iPhone 14","iPhone 15","iPhone 15 Pro","iPhone 16","iPhone 16 Pro"],
         samsung: ["Galaxy S21","Galaxy S22","Galaxy S23","Galaxy S24","Galaxy S25","Galaxy A54","Galaxy A55"],
-        xiaomi: ["Redmi Note 12","Redmi Note 13","Redmi Note 14","Poco X6","Xiaomi 14","Xiaomi 15"],
-        google: ["Pixel 7","Pixel 8","Pixel 9","Pixel 9 Pro"],
-        huawei: ["P50","P60","Mate 50","Mate 60"],
+        xiaomi:  ["Redmi Note 12","Redmi Note 13","Redmi Note 14","Poco X6","Xiaomi 14","Xiaomi 15"],
+        google:  ["Pixel 7","Pixel 8","Pixel 9","Pixel 9 Pro"],
+        huawei:  ["P50","P60","Mate 50","Mate 60"],
         oneplus: ["OnePlus 10","OnePlus 11","OnePlus 12","OnePlus 13"]
       },
       tablet: {
-        apple: ["iPad (9. Gen)","iPad (10. Gen)","iPad Air 5","iPad Air 6","iPad Pro 11\" M2","iPad Pro 13\" M4"],
-        samsung: ["Galaxy Tab S8","Galaxy Tab S9","Galaxy Tab S10","Galaxy Tab A9+"],
+        apple:  ['iPad (9. Gen)','iPad (10. Gen)','iPad Air 5','iPad Air 6','iPad Pro 11" M2','iPad Pro 13" M4'],
+        samsung:["Galaxy Tab S8","Galaxy Tab S9","Galaxy Tab S10","Galaxy Tab A9+"],
         xiaomi: ["Pad 6","Pad 7"],
         lenovo: ["Tab P11 Gen 2","Tab P12","Yoga Tab 13"]
       }
     };
 
-    const baseCO2 = { apple: 92, samsung: 58, xiaomi: 49, google: 88, huawei: 71, oneplus: 62, lenovo: 53, default: 65 };
+    const baseCO2 = { apple:92, samsung:58, xiaomi:49, google:88, huawei:71, oneplus:62, lenovo:53, default:65 };
 
     const damageDatabase = {
-      battery: {
-        name: "🔋 Akku schwach / hält kaum noch",
-        baseCost: { apple: 95, samsung: 65, xiaomi: 55, google: 85, huawei: 70, oneplus: 65, default: 75 },
-        co2Impact: 18,
-        advice: "Der Akku ist das häufigste Verschleißteil. Ein Austausch verlängert die Lebensdauer um 2–4 Jahre. Ab 2026 sind Original-Akkus bei vielen Herstellern günstiger verfügbar.",
-        successRate: "95%",
-        difficulty: "mittel"
-      },
-      screen: {
-        name: "🖥️ Display kaputt / gesprungen / Touch defekt",
-        baseCost: { apple: 320, samsung: 170, xiaomi: 110, google: 220, huawei: 160, oneplus: 145, default: 180 },
-        co2Impact: 35,
-        advice: "Display-Tausch ist teuer, aber lohnt sich bei Modellen unter 4 Jahren. Apple verlangt oft original Ersatzteile. Ab 2027 EU-Recht: günstigere Ersatzteile Pflicht.",
-        successRate: "90%",
-        difficulty: "mittel"
-      },
-      camera: {
-        name: "📷 Kamera defekt / unscharf / Blitze defekt",
-        baseCost: { apple: 145, samsung: 95, xiaomi: 75, google: 130, huawei: 110, oneplus: 85, default: 105 },
-        co2Impact: 22,
-        advice: "Meist nur ein Modul. Bei Dual-/Triple-Kameras kann ein einzelnes Objektiv getauscht werden – sehr gute Erfolgsquote.",
-        successRate: "88%",
-        difficulty: "leicht"
-      },
-      charging: {
-        name: "🔌 Ladebuchse / Port kaputt / lädt langsam",
-        baseCost: { apple: 85, samsung: 55, xiaomi: 45, google: 70, huawei: 60, oneplus: 50, default: 60 },
-        co2Impact: 12,
-        advice: "Oft nur Staub oder ein verbogenes Kontakt. Reinigung hilft manchmal kostenlos. Ansonsten schneller Port-Tausch.",
-        successRate: "97%",
-        difficulty: "leicht"
-      },
-      software: {
-        name: "💻 Software langsam / Abstürze / Akku schnell leer",
-        baseCost: { default: 0 },
-        co2Impact: 8,
-        advice: "Fast immer kostenlos lösbar: Factory-Reset + iOS/Android-Update + Cache leeren + unnötige Apps deinstallieren. Oft besser als gedacht!",
-        successRate: "92%",
-        difficulty: "sehr leicht"
-      },
-      water: {
-        name: "💧 Wasserschaden / Korrosion",
-        baseCost: { apple: 220, samsung: 160, xiaomi: 130, google: 190, huawei: 170, oneplus: 140, default: 165 },
-        co2Impact: 15,
-        advice: "Wasserschäden sind tückisch – Korrosion kann nach 3–6 Monaten schlimmer werden. Trocknen + Ultraschall-Reinigung + Platinen-Check nötig.",
-        successRate: "55%",
-        difficulty: "schwer"
-      }
+      battery:  { name:"Akku schwach", emoji:"🔋", baseCost:{apple:95,samsung:65,xiaomi:55,google:85,huawei:70,oneplus:65,default:75}, co2Impact:18, advice:"Der Akku ist das häufigste Verschleißteil. Ein Austausch verlängert die Lebensdauer um 2–4 Jahre. Ab 2026 sind Original-Akkus bei vielen Herstellern günstiger verfügbar.", successRate:"95%", difficulty:"mittel" },
+      screen:   { name:"Display kaputt", emoji:"🖥️", baseCost:{apple:320,samsung:170,xiaomi:110,google:220,huawei:160,oneplus:145,default:180}, co2Impact:35, advice:"Display-Tausch ist teuer, aber lohnt sich bei Modellen unter 4 Jahren. Apple verlangt oft original Ersatzteile. Ab 2027 EU-Recht: günstigere Ersatzteile Pflicht.", successRate:"90%", difficulty:"mittel" },
+      camera:   { name:"Kamera defekt", emoji:"📷", baseCost:{apple:145,samsung:95,xiaomi:75,google:130,huawei:110,oneplus:85,default:105}, co2Impact:22, advice:"Meist nur ein Modul. Bei Dual-/Triple-Kameras kann ein einzelnes Objektiv getauscht werden – sehr gute Erfolgsquote.", successRate:"88%", difficulty:"leicht" },
+      charging: { name:"Ladebuchse defekt", emoji:"🔌", baseCost:{apple:85,samsung:55,xiaomi:45,google:70,huawei:60,oneplus:50,default:60}, co2Impact:12, advice:"Oft nur Staub oder ein verbogener Kontakt. Reinigung hilft manchmal kostenlos. Ansonsten schneller Port-Tausch.", successRate:"97%", difficulty:"leicht" },
+      software: { name:"Software langsam", emoji:"💻", baseCost:{default:0}, co2Impact:8, advice:"Fast immer kostenlos lösbar: Factory-Reset + iOS/Android-Update + Cache leeren + unnötige Apps deinstallieren.", successRate:"92%", difficulty:"sehr leicht" },
+      water:    { name:"Wasserschaden", emoji:"💧", baseCost:{apple:220,samsung:160,xiaomi:130,google:190,huawei:170,oneplus:140,default:165}, co2Impact:15, advice:"Wasserschäden sind tückisch – Korrosion kann nach 3–6 Monaten schlimmer werden. Trocknen + Ultraschall-Reinigung + Platinen-Check nötig.", successRate:"55%", difficulty:"schwer" }
     };
 
     let selectedDevice = null;
 
+    // ───────── BUILD DAMAGE CHIPS ─────────
     function createDamageOptions() {
       const container = document.getElementById("damageOptions");
       container.innerHTML = "";
       Object.keys(damageDatabase).forEach(key => {
         const d = damageDatabase[key];
         const label = document.createElement("label");
-        label.className = "flex items-start gap-3 bg-white border border-gray-200 hover:border-green-400 rounded-2xl p-4 cursor-pointer transition damage-tag";
+        label.className = "damage-chip";
+        label.dataset.key = key;
         label.innerHTML = `
-          <input type="checkbox" value="${key}" class="mt-1 w-5 h-5 accent-green-600">
-          <div>
-            <span class="font-medium">${d.name}</span>
-          </div>
+          <input type="checkbox" value="${key}">
+          <div class="damage-check"></div>
+          <div class="damage-chip-icon">${d.emoji}</div>
+          <div class="damage-chip-name">${d.name}</div>
         `;
+        label.addEventListener("click", function(e) {
+          if (e.target.tagName === "INPUT") return;
+          const cb = this.querySelector('input');
+          cb.checked = !cb.checked;
+          this.classList.toggle("selected", cb.checked);
+          e.preventDefault();
+        });
+        label.querySelector('input').addEventListener('change', function() {
+          label.classList.toggle("selected", this.checked);
+        });
         container.appendChild(label);
       });
     }
 
-    // ==================== FIX: Event-Listener (Bug behoben) ====================
+    // ───────── DROPDOWNS ─────────
     document.getElementById("device").addEventListener("change", (e) => {
       selectedDevice = e.target.value;
       const brandSel = document.getElementById("brand");
@@ -249,8 +1180,6 @@
         });
         brandSel.disabled = false;
       } else brandSel.disabled = true;
-      
-      // Nur hier zurücksetzen (wenn Gerät geändert wird)
       document.getElementById("model").disabled = true;
       document.getElementById("age").disabled = true;
     });
@@ -259,20 +1188,14 @@
       const brand = document.getElementById("brand").value;
       const modelSel = document.getElementById("model");
       modelSel.innerHTML = '<option value="">Modell wählen</option>';
-      
       if (selectedDevice && brand && models[selectedDevice][brand]) {
         models[selectedDevice][brand].forEach(m => {
           const opt = document.createElement("option");
-          opt.value = m; 
-          opt.textContent = m;
+          opt.value = m; opt.textContent = m;
           modelSel.appendChild(opt);
         });
-        modelSel.disabled = false;   // ← Modell wird jetzt richtig aktiv
-      } else {
-        modelSel.disabled = true;
-      }
-      
-      // Alter zurücksetzen (aber Modell bleibt aktiv)
+        modelSel.disabled = false;
+      } else modelSel.disabled = true;
       document.getElementById("age").disabled = true;
     });
 
@@ -280,37 +1203,33 @@
       const ageSel = document.getElementById("age");
       ageSel.innerHTML = '<option value="">Alter wählen</option>';
       if (!this.value) return;
-
       let maxYears = 7;
       if (/16|15|S25|14 Pro/.test(this.value)) maxYears = 3;
       else if (/14|13|S23|Pixel 9/.test(this.value)) maxYears = 5;
       else if (/12|11|S21/.test(this.value)) maxYears = 6;
-
       const ranges = [
-        {val:1, txt:"< 1 Jahr"}, {val:2, txt:"1–2 Jahre"},
-        {val:3, txt:"2–3 Jahre"}, {val:5, txt:"3–5 Jahre"},
-        {val:7, txt:"5+ Jahre"}
+        {val:1,txt:"< 1 Jahr"},{val:2,txt:"1–2 Jahre"},
+        {val:3,txt:"2–3 Jahre"},{val:5,txt:"3–5 Jahre"},{val:7,txt:"5+ Jahre"}
       ];
       ranges.forEach(r => {
         if (r.val <= maxYears) {
           const opt = document.createElement("option");
-          opt.value = r.val; 
-          opt.textContent = r.txt;
+          opt.value = r.val; opt.textContent = r.txt;
           ageSel.appendChild(opt);
         }
       });
-      ageSel.disabled = false;   // ← Alter wird jetzt richtig aktiv
+      ageSel.disabled = false;
     });
 
-    // ====================== HAUPT-ANALYSE ======================
+    // ───────── ANALYZE ─────────
     function analyzeDevice() {
-      const model = document.getElementById("model").value;
-      const brand = document.getElementById("brand").value;
+      const model  = document.getElementById("model").value;
+      const brand  = document.getElementById("brand").value;
       const ageVal = parseInt(document.getElementById("age").value);
       const checkedDamages = Array.from(document.querySelectorAll('#damageOptions input[type="checkbox"]:checked')).map(cb => cb.value);
 
       if (!model || !brand || !ageVal || checkedDamages.length === 0) {
-        alert("Bitte Gerät, Marke, Modell, Alter und mindestens einen Defekt auswählen.");
+        alert("Bitte Gerätetyp, Marke, Modell, Alter und mindestens einen Defekt auswählen.");
         return;
       }
 
@@ -324,115 +1243,133 @@
       checkedDamages.forEach(dmgKey => {
         const dmg = damageDatabase[dmgKey];
         let cost = dmg.baseCost[brand] || dmg.baseCost.default || 80;
-
         if (model.includes("Pro") || model.includes("iPhone") || model.includes("Pixel")) cost = Math.round(cost * 1.3);
-
         const ageFactor = ageVal > 5 ? 1.4 : (ageVal > 3 ? 1.15 : 1);
         cost = Math.round(cost * ageFactor);
-
         const co2This = Math.round(dmg.co2Impact * (1 - ageVal * 0.11));
         totalRepairCost += cost;
         totalCO2Saved += co2This;
 
         damageResultsHTML += `
-          <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm card-hover">
-            <div class="flex justify-between items-start">
+          <div class="damage-result-card">
+            <div class="drc-top">
               <div>
-                <span class="text-2xl">${dmg.name}</span>
-                <p class="text-green-700 font-semibold mt-1">${cost} € • Erfolgsquote: ${dmg.successRate}</p>
+                <div class="drc-name">${dmg.emoji} ${dmg.name}</div>
+                <div class="drc-meta">
+                  <span class="drc-pill success">✓ ${dmg.successRate} Erfolgsquote</span>
+                  <span class="drc-pill diff">${dmg.difficulty}</span>
+                </div>
               </div>
-              <div class="text-right text-sm">
-                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-2xl">${dmg.difficulty}</span>
-              </div>
+              <div class="drc-cost">${cost > 0 ? cost + ' €' : 'Kostenlos'}</div>
             </div>
-            <p class="mt-4 text-gray-700 leading-relaxed">${dmg.advice}</p>
-            <p class="text-xs mt-3 text-gray-500">CO₂-Einsparung bei Reparatur dieses Teils: <strong>${co2This} kg</strong></p>
+            <div class="drc-advice">${dmg.advice}</div>
+            <div class="drc-co2">CO₂-Einsparung bei Reparatur: <strong>${co2This} kg</strong></div>
           </div>`;
       });
 
       const synergyBonus = checkedDamages.length > 1 ? 12 : 0;
       totalCO2Saved = Math.max(18, Math.round(totalCO2Saved + synergyBonus - Math.random() * 8));
 
-      let overallStatus = "";
-      let overallColor = "";
-      let recommendationText = "";
+      let statusText, statusColor, statusClass, recommendationText;
+      const isYoung = ageVal <= 3, isMedium = ageVal <= 5;
+      const avgCost = totalRepairCost / checkedDamages.length;
 
-      const avgCostPerDamage = totalRepairCost / checkedDamages.length;
-      const isYoung = ageVal <= 3;
-      const isMedium = ageVal <= 5;
-
-      if (isYoung && avgCostPerDamage < 180 && totalRepairCost < 420) {
-        overallStatus = "Reparatur lohnt sich extrem!";
-        overallColor = "#10b981";
-        recommendationText = `Bei deinem ${model} (${ageVal} Jahre) und den ausgewählten Defekten ist eine Reparatur die mit Abstand beste Wahl. Du sparst Geld, Ressourcen und ${totalCO2Saved} kg CO₂. Ab 2026/27 wird das durch das neue EU-Recht auf Reparatur noch einfacher und günstiger.`;
+      if (isYoung && avgCost < 180 && totalRepairCost < 420) {
+        statusText = "✅ Reparatur lohnt sich extrem!";
+        statusColor = "var(--green-glow)"; statusClass = "green";
+        recommendationText = `Bei deinem ${model} (${ageVal} Jahre) ist eine Reparatur die mit Abstand beste Wahl. Du sparst Geld, Ressourcen und ${totalCO2Saved} kg CO₂. Ab 2026/27 wird das durch das neue EU-Recht auf Reparatur noch einfacher und günstiger.`;
       } else if (isMedium && totalRepairCost < 380) {
-        overallStatus = "Reparatur ist sinnvoll – aber prüfe genau";
-        overallColor = "#f59e0b";
-        recommendationText = `Die Reparatur deiner ausgewählten Defekte kostet insgesamt ca. ${Math.round(totalRepairCost)} €. Bei deinem Alter des Geräts ist das noch wirtschaftlich. Besonders der Akku- oder Display-Tausch würde die Lebensdauer deutlich verlängern.`;
+        statusText = "⚠️ Reparatur sinnvoll – genau prüfen";
+        statusColor = "var(--amber)"; statusClass = "amber";
+        recommendationText = `Die Reparatur der ausgewählten Defekte kostet ca. ${Math.round(totalRepairCost)} €. Bei diesem Gerätealter ist das noch wirtschaftlich. Besonders Akku- oder Display-Tausch würde die Lebensdauer deutlich verlängern.`;
       } else if (checkedDamages.includes("water") && ageVal > 4) {
-        overallStatus = "Vorsicht bei Wasserschaden + Alter";
-        overallColor = "#ef4444";
-        recommendationText = `Der Wasserschaden in Kombination mit dem Alter macht eine Reparatur riskant und teuer. Die Erfolgsquote sinkt stark. Recycling ist hier oft die nachhaltigere und günstigere Option.`;
+        statusText = "⚠️ Vorsicht: Wasserschaden + Alter";
+        statusColor = "var(--red-warn)"; statusClass = "red";
+        recommendationText = `Der Wasserschaden in Kombination mit dem Gerätealter macht eine Reparatur riskant und teuer. Die Erfolgsquote sinkt stark. Recycling ist hier oft die nachhaltigere und günstigere Option.`;
       } else {
-        overallStatus = "Recycling empfohlen";
-        overallColor = "#ef4444";
-        recommendationText = `Bei ${ageVal} Jahren und den kombinierten Defekten wird eine Reparatur teuer und lohnt sich selten. Dein Gerät hat bereits viele Ressourcen verbraucht – Recycling schließt den Kreislauf und spart neue Rohstoffe.`;
+        statusText = "♻️ Recycling empfohlen";
+        statusColor = "var(--red-warn)"; statusClass = "red";
+        recommendationText = `Bei ${ageVal} Jahren und den kombinierten Defekten wird eine Reparatur teuer und lohnt sich selten. Recycling schließt den Kreislauf und spart neue Rohstoffe.`;
       }
 
-      const headerHTML = `
-        <div class="flex flex-col md:flex-row gap-6 items-center bg-gradient-to-r from-green-700 to-emerald-600 text-white rounded-3xl px-8 py-6">
-          <div class="flex-1">
-            <p class="text-emerald-200">Dein Gerät</p>
-            <p class="text-3xl font-bold">${model} • ${ageVal} Jahre • ${brand.toUpperCase()}</p>
-          </div>
-          <div class="text-center">
-            <p class="text-5xl font-extrabold">${Math.round(totalRepairCost)} €</p>
-            <p class="text-sm opacity-90">geschätzte Gesamt-Reparaturkosten</p>
-          </div>
-          <div class="flex-1 text-right">
-            <p class="text-emerald-200">Ausgewählte Defekte</p>
-            <div class="flex flex-wrap gap-2 justify-end">${checkedDamages.map(k => `<span class="px-4 py-1 bg-white/20 text-white rounded-3xl text-sm">${damageDatabase[k].name.split(" ")[0]}</span>`).join("")}</div>
-          </div>
+      document.getElementById("resultHeader").innerHTML = `
+        <div class="result-device">
+          <div class="result-device-label">Dein Gerät</div>
+          <div class="result-device-name">${model}</div>
+          <div style="color:var(--text-muted);font-size:13px;margin-top:4px;">${brand.toUpperCase()} · ${ageVal} Jahr${ageVal !== 1 ? 'e' : ''} alt</div>
+        </div>
+        <div class="result-cost">
+          <div class="result-cost-num">${totalRepairCost > 0 ? Math.round(totalRepairCost) + ' €' : 'Gratis'}</div>
+          <div class="result-cost-label">Geschätzte Reparaturkosten</div>
+        </div>
+        <div class="result-tags">
+          ${checkedDamages.map(k => `<span class="result-tag">${damageDatabase[k].emoji} ${damageDatabase[k].name}</span>`).join('')}
         </div>`;
 
-      document.getElementById("resultHeader").innerHTML = headerHTML;
       document.getElementById("damageResults").innerHTML = damageResultsHTML;
 
-      document.getElementById("overallRecommendation").innerHTML = `
-        <h3 class="text-2xl font-bold mb-3" style="color:${overallColor}">${overallStatus}</h3>
-        <p class="text-lg leading-relaxed">${recommendationText}</p>
-        <p class="mt-4 text-sm opacity-75">Tipp: In vielen Städten gibt es Reparatur-Cafés oder Maker-Spaces, die günstigere Preise anbieten.</p>
-      `;
+      // ── REPAIR PANEL ──
+      const repairPercent = Math.min(100, Math.round((totalCO2Saved / 110) * 100));
+      const lifespan = ageVal <= 3 ? "2–4 Jahre" : ageVal <= 5 ? "1–3 Jahre" : "6–18 Monate";
+      document.getElementById("repair-cost-display").textContent = totalRepairCost > 0 ? Math.round(totalRepairCost) + " €" : "Kostenlos";
+      document.getElementById("repair-co2-display").textContent = totalCO2Saved + " kg CO₂";
+      document.getElementById("repair-life-display").textContent = lifespan;
+      document.getElementById("repair-co2-display").classList.add("green");
+      setTimeout(() => {
+        document.getElementById("co2bar-repair").style.width = repairPercent + "%";
+        document.getElementById("co2bar-repair").textContent = repairPercent + "%";
+      }, 300);
+      document.getElementById("co2text-repair").innerHTML =
+        `Durch Reparatur aller Defekte sparst du <strong>${totalCO2Saved} kg CO₂</strong> – das entspricht <strong>${Math.round(totalCO2Saved * 5)} km</strong> Autofahrt oder <strong>${Math.round(totalCO2Saved / 0.4)} Tagen</strong> Haushaltsstromverbrauch.`;
 
-      const percent = Math.min(100, Math.round((totalCO2Saved / 110) * 100));
-      document.getElementById("co2bar").style.width = percent + "%";
-      document.getElementById("co2bar").innerHTML = `${percent}% <span class="text-xs opacity-90 ml-2">(${totalCO2Saved} kg)</span>`;
-      document.getElementById("co2text").innerHTML = `
-        Durch die Reparatur aller ausgewählten Defekte sparst du <strong>${totalCO2Saved} kg CO₂</strong>.<br>
-        Das entspricht der Emission eines Mittelklasse-Autos auf <strong>${Math.round(totalCO2Saved * 5)} km</strong> oder dem Stromverbrauch eines Haushalts für <strong>${Math.round(totalCO2Saved / 0.4)} Tage</strong>.
-      `;
+      // ── RECYCLE PANEL ──
+      const recycleCO2 = Math.round(producedCO2 * 0.35); // ~35% of production CO2 saved by correct recycling
+      const recyclePercent = Math.min(100, Math.round((recycleCO2 / 110) * 100));
+      const materials = ["🥇 Gold", "🥈 Silber", "⚡ Kupfer", "🔋 Lithium", "💎 Kobalt", "🌐 Seltene Erden", "🔩 Aluminium", "♻️ Glas"];
+      document.getElementById("recycle-materials-display").textContent = "60+ Elemente";
+      document.getElementById("recycle-materials-grid").innerHTML =
+        materials.map(m => `<span class="mat-chip">${m}</span>`).join('');
+      setTimeout(() => {
+        document.getElementById("co2bar-recycle").style.width = recyclePercent + "%";
+        document.getElementById("co2bar-recycle").textContent = recyclePercent + "%";
+      }, 300);
+      document.getElementById("co2text-recycle").innerHTML =
+        `Korrektes Recycling spart ca. <strong style="color:#67e8f9">${recycleCO2} kg CO₂</strong> gegenüber unkontrollierter Entsorgung. Bis zu <strong style="color:#67e8f9">95 %</strong> der Wertstoffe in deinem Gerät können zurückgewonnen werden.`;
 
-      document.getElementById("result").classList.remove("hidden");
-      document.getElementById("result").scrollIntoView({ behavior: "smooth" });
+      const resultEl = document.getElementById("result");
+      resultEl.classList.add("visible");
+      setTimeout(() => resultEl.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     }
 
-    function findRepair() {
-      window.open("https://www.google.com/maps/search/Handy+Reparatur+Smartphone+Reparatur+in+meiner+Nähe", "_blank");
+    function showTab(tab) {
+      const isRepair = tab === 'repair';
+      document.getElementById("panel-repair").classList.toggle("hidden", !isRepair);
+      document.getElementById("panel-recycle").classList.toggle("hidden", isRepair);
+      document.getElementById("tab-repair").className = "choice-tab" + (isRepair ? " active" : "");
+      document.getElementById("tab-recycle").className = "choice-tab" + (!isRepair ? " active active-recycle" : "");
+      // Re-animate bars when switching
+      setTimeout(() => {
+        if (isRepair) {
+          const bar = document.getElementById("co2bar-repair");
+          const w = bar.style.width; bar.style.width = "0%";
+          setTimeout(() => { bar.style.width = w; }, 50);
+        } else {
+          const bar = document.getElementById("co2bar-recycle");
+          const w = bar.style.width; bar.style.width = "0%";
+          setTimeout(() => { bar.style.width = w; }, 50);
+        }
+      }, 50);
     }
 
-    function findRecycle() {
-      window.open("https://www.google.com/maps/search/Elektroschrott+Recycling+Wertstoffhof+in+der+Nähe", "_blank");
-    }
-
+    function findRepair()  { window.open("https://www.google.com/maps/search/Handy+Reparatur+in+meiner+N%C3%A4he", "_blank"); }
+    function findRecycle() { window.open("https://www.google.com/maps/search/Elektroschrott+Recycling+Wertstoffhof+in+der+N%C3%A4he", "_blank"); }
     function shareResult() {
-      const text = "Mein detailliertes ReUse-Ergebnis ist da! Mehrfach-Defekte analysiert – Reparieren oder recyclen? ♻️\nhttps://deine-domain.de";
-      navigator.clipboard.writeText(text).then(() => alert("✅ Ergebnis wurde in die Zwischenablage kopiert!"));
+      const text = "Mein ReUse-Ergebnis: Reparieren oder recyclen? ♻️\nhttps://reuse-analyzer.de";
+      navigator.clipboard.writeText(text).then(() => alert("✅ In Zwischenablage kopiert!"));
     }
 
-    // Initialisieren
-    window.onload = () => {
-      createDamageOptions();
-    };
+    window.onload = createDamageOptions;
   </script>
+
 </body>
 </html>
